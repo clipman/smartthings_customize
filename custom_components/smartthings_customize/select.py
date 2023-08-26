@@ -77,7 +77,7 @@ class SmartThingsSelect_custom(SmartThingsEntity, SelectEntity):
             if self._component == "main":
                 opt = self._device.status.attributes[self._options["attribute"]].value
             else:
-                opt = self._device.status._components[self._component].attributes.get(self.options["attribute"]).value if self._device.status._components.get(self._component) else []
+                opt = self._device.status._components[self._component].attributes.get(self._options["attribute"]).value if self._device.status._components.get(self._component) else []
         else:
             opt = self._options
         return opt
