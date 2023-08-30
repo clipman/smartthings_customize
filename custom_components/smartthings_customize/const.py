@@ -50,6 +50,7 @@ PLATFORMS = [
     Platform.NUMBER,
     Platform.SELECT,
     Platform.BUTTON,
+    Platform.TEXT,
 ]
 
 CUSTOM_PLATFORMS = [
@@ -59,6 +60,7 @@ CUSTOM_PLATFORMS = [
     "numbers",
     "selects",
     "buttons",
+    "texts",
 ]
 
 IGNORED_CAPABILITIES = [
