@@ -23,6 +23,14 @@ import string
 import logging
 _LOGGER = logging.getLogger(__name__)
 
+def list_set(input_list):
+    seen = set()
+    result = []
+    for item in input_list:
+        if item not in seen:
+            seen.add(item)
+            result.append(item)
+    return list(result)
 
 def is_valid_state(state) -> bool:
     return state and state.state != STATE_UNKNOWN and state.state != STATE_UNAVAILABLE and state.state != None
@@ -60,8 +68,15 @@ class SmartThingsEntity_custom(Entity):
         self._capability = {}
         self._capability[platform] = setting[1]
 
+        device_name_list = SettingManager.device_name_list()
+        self._device_label = self._device.label
+        for k, v in device_name_list.items():
+            if k == self._device.label:
+                self._device_label = v
+                break
+
         t = format_util(DEFAULT_UNIQUE_ID_FORMAT)
-        unique_id_format = t.substitute(device_id=self._device.device_id, device_type=self._device.type, label=self._device.label, component=component,
+        unique_id_format = t.substitute(device_id=self._device.device_id, device_type=self._device.type, label=self._device_label, component=component,
                                         capability=capability, attribute=attribute, command=command, name=name)
         self._unique_id = "{}".format(platform + "." + unique_id_format)
 
@@ -70,12 +85,12 @@ class SmartThingsEntity_custom(Entity):
         if setting[1].get(CONF_ENTITY_ID_FORMAT) != None:
             entity_id_format = setting[1].get(CONF_ENTITY_ID_FORMAT)
         t = format_util(entity_id_format)
-        entity_id_format = t.substitute(device_id=self._device.device_id, device_type=self._device.type, label=self._device.label, component=component,
+        entity_id_format = t.substitute(device_id=self._device.device_id, device_type=self._device.type, label=self._device_label, component=component,
                                         capability=capability, attribute=attribute, command=command, name=name)
         self.entity_id = "{}".format(platform + "." + entity_id_format)
 
         t = format_util(name)
-        self._name = t.substitute(device_id=self._device.device_id, device_type=self._device.type, label=self._device.label, component=component,
+        self._name = t.substitute(device_id=self._device.device_id, device_type=self._device.type, label=self._device_label, component=component,
                                   capability=capability, attribute=attribute, command=command, name=name)
         
         _LOGGER.debug("create entity id : %s", self.entity_id)
@@ -280,7 +295,16 @@ class SmartThingsEntity_custom(Entity):
         except:
             _LOGGER.debug("not found capabilities : " + traceback.format_exc())
             return default
-    
+
+    def get_list(self, platform, attr, default={}):
+        try:
+            options_list = self._capability[platform].get(attr)
+            if options_list is None:
+                return default
+            return options_list
+        except:
+            _LOGGER.debug("not found list : " + traceback.format_exc())
+            return default
 
 class SettingManager(object):
     def __new__(cls, *args, **kwargs):
@@ -414,6 +438,13 @@ class SettingManager(object):
         except Exception as e:
             _LOGGER.debug("default_entity_id_format error : " + traceback.format_exc())
             return False 
+
+    @staticmethod
+    def device_name_list() -> list[str]:
+        try:
+            return SettingManager()._settings.get("device_name_list")
+        except Exception as e:
+            return {}
 
     @staticmethod
     def enable_syntax_property() -> bool:
