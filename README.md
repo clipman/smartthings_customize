@@ -408,6 +408,15 @@ ignore_platforms:
 
 default_entity_id_format: "st_custom_%{device_id}_%{device_type}_%{label}_%{component}_%{capability}_%{attribute}_%{command}_%{name}"
 
+device_name_list:
+  "Samsung The Frame 75": "Samsung TV"
+  "거실 에어컨": "Livingroom Aircon"
+  "빅스비(거실)": "Livingroom Bixby"
+  "빅스비(서재)": "Computer Bixby"
+  "빅스비(안방)": "Mainroom Bixby"
+  "사운드바": "Sound Bar"
+  "에어모니터": "Livingroom Air Monitor"
+  "작은방 공기청정기": "Smallroom Air Purifier"
 
   ```
 
