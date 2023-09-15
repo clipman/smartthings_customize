@@ -27,9 +27,13 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfTemperature,
     UnitOfVolume,
+    CONF_ENTITY_ID,
+    CONF_UNIT_OF_MEASUREMENT,
+    CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_track_state_change
 from homeassistant.util import dt as dt_util
 
 from . import SmartThingsEntity
@@ -108,7 +112,7 @@ CAPABILITY_TO_SENSORS: dict[str, list[Map]] = {
     Capability.carbon_dioxide_measurement: [
         Map(
             Attribute.carbon_dioxide,
-            "Carbon Dioxide Measurement",
+            "CO2",
             CONCENTRATION_PARTS_PER_MILLION,
             SensorDeviceClass.CO2,
             SensorStateClass.MEASUREMENT,
@@ -181,7 +185,7 @@ CAPABILITY_TO_SENSORS: dict[str, list[Map]] = {
     Capability.dust_sensor: [
         Map(
             Attribute.fine_dust_level,
-            "Fine Dust Level",
+            "PM2.5",
             None,
             None,
             SensorStateClass.MEASUREMENT,
@@ -189,7 +193,7 @@ CAPABILITY_TO_SENSORS: dict[str, list[Map]] = {
         ),
         Map(
             Attribute.dust_level,
-            "Dust Level",
+            "PM10",
             None,
             None,
             SensorStateClass.MEASUREMENT,
@@ -297,7 +301,7 @@ CAPABILITY_TO_SENSORS: dict[str, list[Map]] = {
         Map(Attribute.playback_status, "Media Playback Status", None, None, None, None)
     ],
     Capability.odor_sensor: [
-        Map(Attribute.odor_level, "Odor Sensor", None, None, None, None)
+        Map(Attribute.odor_level, "Odor Level", None, None, None, None)
     ],
     Capability.oven_mode: [
         Map(
@@ -351,7 +355,7 @@ CAPABILITY_TO_SENSORS: dict[str, list[Map]] = {
     Capability.relative_humidity_measurement: [
         Map(
             Attribute.humidity,
-            "Relative Humidity Measurement",
+            "Humidity",
             PERCENTAGE,
             SensorDeviceClass.HUMIDITY,
             SensorStateClass.MEASUREMENT,
@@ -412,7 +416,7 @@ CAPABILITY_TO_SENSORS: dict[str, list[Map]] = {
     Capability.temperature_measurement: [
         Map(
             Attribute.temperature,
-            "Temperature Measurement",
+            "Temperature",
             None,
             SensorDeviceClass.TEMPERATURE,
             SensorStateClass.MEASUREMENT,
@@ -481,13 +485,13 @@ CAPABILITY_TO_SENSORS: dict[str, list[Map]] = {
     ],
     Capability.three_axis: [],
     Capability.tv_channel: [
-        Map(Attribute.tv_channel, "Tv Channel", None, None, None, None),
-        Map(Attribute.tv_channel_name, "Tv Channel Name", None, None, None, None),
+        Map(Attribute.tv_channel, "Channel", None, None, None, None),
+        Map(Attribute.tv_channel_name, "Channel Name", None, None, None, None),
     ],
     Capability.tvoc_measurement: [
         Map(
             Attribute.tvoc_level,
-            "Tvoc Measurement",
+            "Tvoc",
             CONCENTRATION_PARTS_PER_MILLION,
             None,
             SensorStateClass.MEASUREMENT,
@@ -507,7 +511,7 @@ CAPABILITY_TO_SENSORS: dict[str, list[Map]] = {
     Capability.voltage_measurement: [
         Map(
             Attribute.voltage,
-            "Voltage Measurement",
+            "Voltage",
             UnitOfElectricPotential.VOLT,
             SensorDeviceClass.VOLTAGE,
             SensorStateClass.MEASUREMENT,
@@ -543,6 +547,7 @@ UNITS = {
     "C": UnitOfTemperature.CELSIUS,
     "F": UnitOfTemperature.FAHRENHEIT,
     "lux": LIGHT_LUX,
+    "μg/m^3": CONCENTRATION_MICROGRAMS_PER_CUBIC_METER,
 }
 
 THREE_AXIS_NAMES = ["X Coordinate", "Y Coordinate", "Z Coordinate"]
@@ -698,7 +703,10 @@ class SmartThingsSensor_custom(SmartThingsEntity_custom, SensorEntity):
     def __init__(self, hass, setting) -> None:
         super().__init__(hass, platform=Platform.SENSOR,setting=setting)
 
-        self._default_unit = setting[1].get(CONF_DEFAULT_UNIT)
+        if setting[1].get(CONF_DEFAULT_UNIT) is None:
+            self._default_unit = setting[1].get(CONF_UNIT_OF_MEASUREMENT)
+        else:
+            self._default_unit = setting[1].get(CONF_DEFAULT_UNIT)
         self._device_class = setting[1].get(CONF_DEVICE_CLASS)
         self._state_class = setting[1].get(CONF_STATE_CLASS)
         self._entity_category = setting[1].get(CONF_ENTITY_CATEGORY)
@@ -731,8 +739,7 @@ class SmartThingsSensor_custom(SmartThingsEntity_custom, SensorEntity):
     def native_unit_of_measurement(self):
         """Return the unit this state is expressed in."""
         unit = self.get_attr_unit(Platform.SENSOR, CONF_STATE)
-        return UNITS.get(unit, unit) if unit else self._default_unit
-
+        return self._default_unit if self._default_unit else UNITS.get(unit, unit)
 
 class SmartThingsThreeAxisSensor(SmartThingsEntity, SensorEntity):
     """Define a SmartThings Three Axis Sensor."""
