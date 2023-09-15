@@ -279,11 +279,16 @@ class SmartThingsClimate_custom(SmartThingsEntity_custom, ClimateEntity):
                 await self.send_command(key, self.get_command(key), [value])
 
     async def async_turn_on(self) -> None:
-        await self.send_command(ATTR_SWITCH, self.get_command(ATTR_SWITCH).get(STATE_ON), self.get_argument(ATTR_SWITCH).get(STATE_ON, []))
+        if entity_id := self.get_attr_value(ATTR_SWITCH, CONF_ENTITY_ID):
+            await self.hass.services.async_call("homeassistant", SERVICE_TURN_ON, {"entity_id": entity_id}, False)
+        else:
+            await self.send_command(ATTR_SWITCH, self.get_command(ATTR_SWITCH).get(STATE_ON), self.get_argument(ATTR_SWITCH).get(STATE_ON, []))
         
     async def async_turn_off(self) -> None:
-        _LOGGER.error("call async_turn_off")
-        await self.send_command(ATTR_SWITCH, self.get_command(ATTR_SWITCH).get(STATE_OFF), self.get_argument(ATTR_SWITCH).get(STATE_OFF, []))
+        if entity_id := self.get_attr_value(ATTR_SWITCH, CONF_ENTITY_ID):
+            await self.hass.services.async_call("homeassistant", SERVICE_TURN_ON, {"entity_id": entity_id}, False)
+        else:
+            await self.send_command(ATTR_SWITCH, self.get_command(ATTR_SWITCH).get(STATE_OFF), self.get_argument(ATTR_SWITCH).get(STATE_OFF, []))
     
     async def async_turn_aux_heat_off(self) -> None:
         await self.send_command(ATTR_AUX_HEAT, self.get_command(ATTR_AUX_HEAT).get(STATE_OFF), self.get_argument(ATTR_AUX_HEAT).get(STATE_OFF, []))
