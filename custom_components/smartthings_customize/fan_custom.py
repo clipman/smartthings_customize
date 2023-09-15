@@ -83,14 +83,20 @@ class SmartThingsFan_custom(SmartThingsEntity_custom, FanEntity):
     
     # method ########################################################################################
     async def async_turn_on(self, percentage: int | None = None, preset_mode: str | None = None, **kwargs: Any) -> None:
-        await self.send_command(ATTR_SWITCH, self.get_command(ATTR_SWITCH).get(STATE_ON), self.get_argument(ATTR_SWITCH).get(STATE_ON, []))
-        if percentage:
-            await self.async_set_percentage(percentage)
-        if preset_mode:
-            await self.async_set_preset_mode(preset_mode)
+        if entity_id := self.get_attr_value(ATTR_SWITCH, CONF_ENTITY_ID):
+            await self.hass.services.async_call("homeassistant", SERVICE_TURN_ON, {"entity_id": entity_id}, False)
+        else:
+            await self.send_command(ATTR_SWITCH, self.get_command(ATTR_SWITCH).get(STATE_ON), self.get_argument(ATTR_SWITCH).get(STATE_ON, []))
+        if self.percentage:
+            await self.async_set_percentage(self.percentage)
+        if self.preset_mode:
+            await self.async_set_preset_mode(self.preset_mode)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.send_command(ATTR_SWITCH, self.get_command(ATTR_SWITCH).get(STATE_OFF), self.get_argument(ATTR_SWITCH).get(STATE_OFF, []))
+        if entity_id := self.get_attr_value(ATTR_SWITCH, CONF_ENTITY_ID):
+            await self.hass.services.async_call("homeassistant", SERVICE_TURN_ON, {"entity_id": entity_id}, False)
+        else:
+            await self.send_command(ATTR_SWITCH, self.get_command(ATTR_SWITCH).get(STATE_OFF), self.get_argument(ATTR_SWITCH).get(STATE_OFF, []))
 
     async def async_set_direction(self, direction: str) -> None:
         await self.send_command(ATTR_DIRECTION, self.get_command(ATTR_DIRECTION), [direction])
