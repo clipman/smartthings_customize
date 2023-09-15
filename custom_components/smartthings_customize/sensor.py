@@ -666,6 +666,8 @@ class SmartThingsSensor(SmartThingsEntity, SensorEntity):
         self._attr_state_class = state_class
         self._attr_entity_category = entity_category
 
+        self.entity_id = f"sensor.{self._device_label}_{self._name}"
+
     @property
     def name(self) -> str:
         """Return the name of the sensor."""
@@ -749,6 +751,8 @@ class SmartThingsThreeAxisSensor(SmartThingsEntity, SensorEntity):
         super().__init__(device)
         self._index = index
 
+        self.entity_id = f"sensor.{self._device_label}_{THREE_AXIS_NAMES[self._index]}"
+
     @property
     def name(self) -> str:
         """Return the name of the sensor."""
@@ -783,6 +787,8 @@ class SmartThingsPowerConsumptionSensor(SmartThingsEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.MEASUREMENT
         if self.report_name != "power":
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+
+        self.entity_id = f"sensor.{self._device_label}_{self.report_name}"
 
     @property
     def name(self) -> str:
