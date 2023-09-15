@@ -495,6 +495,13 @@ class SmartThingsEntity(Entity):
         self._device = device
         self._dispatcher_remove = None
 
+        device_name_list = SettingManager.device_name_list()
+        self._device_label = self._device.label
+        for k, v in device_name_list.items():
+            if k == self._device.label:
+                self._device_label = v
+                break
+
     async def async_added_to_hass(self):
         """Device added to hass."""
 
@@ -528,7 +535,7 @@ class SmartThingsEntity(Entity):
     @property
     def name(self) -> str:
         """Return the name of the device."""
-        return self._device.label
+        return self._device_label
 
     @property
     def unique_id(self) -> str:
