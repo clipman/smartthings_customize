@@ -87,6 +87,7 @@ class SmartThingsBinarySensor(SmartThingsEntity, BinarySensorEntity):
         """Init the class."""
         super().__init__(device)
         self._attribute = attribute
+        self.entity_id = f"binary_sensor.{self._device_label}_{self._name}"
 
     @property
     def name(self) -> str:
