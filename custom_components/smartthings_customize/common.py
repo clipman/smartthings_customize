@@ -4,7 +4,7 @@ import traceback
 from homeassistant.const import Platform, CONF_TYPE
 from .const import *
 from homeassistant.const import (
-    STATE_UNKNOWN, STATE_UNAVAILABLE, CONF_ICON
+    STATE_UNKNOWN, STATE_UNAVAILABLE, CONF_ICON, CONF_ENTITY_ID
 )
 
 from homeassistant.helpers.dispatcher import (
@@ -305,6 +305,17 @@ class SmartThingsEntity_custom(Entity):
         except:
             _LOGGER.debug("not found list : " + traceback.format_exc())
             return default
+
+    def get_entity_value(self, platform, default = None):
+        if entity_id := self.get_attr_value(platform, CONF_ENTITY_ID):
+            if attribute := self.get_attribute(platform):
+                return self.hass.states.get(entity_id).attributes[attribute]
+            else:
+                state = self.hass.states.get(entity_id)
+                return state.state if is_valid_state(state) else default
+        else:
+            value = self.get_attr_value(platform, CONF_ATTRIBUTE, None)
+            return value if value != None else default
 
 class SettingManager(object):
     def __new__(cls, *args, **kwargs):
