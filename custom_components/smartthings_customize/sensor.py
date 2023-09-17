@@ -666,7 +666,7 @@ class SmartThingsSensor(SmartThingsEntity, SensorEntity):
         self._attr_state_class = state_class
         self._attr_entity_category = entity_category
 
-        self.entity_id = f"sensor.{self._device_label}_{self._name}"
+        self.entity_id = f"sensor.{self._device_label}_{self._name.replace('.', '')}"
 
     @property
     def name(self) -> str:
