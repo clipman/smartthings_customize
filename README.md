@@ -434,9 +434,11 @@ device_name_list:
 - fan
 
 # event
+```
 trigger:
   - platform: event
     event_type: smartthings.button
     event_data:
       device_id: xxxxxxxx-0828-4de0-9df6-73c797d72635
       value: pushed
+```
