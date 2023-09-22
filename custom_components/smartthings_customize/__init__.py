@@ -456,8 +456,10 @@ class DeviceBroker:
 
             # Fire events for buttons
             if (
-                evt.capability == Capability.button
-                and evt.attribute == Attribute.button
+                (evt.capability == Capability.button
+                and evt.attribute == Attribute.button) or
+                (evt.capability == "tag.tagButton"
+                and evt.attribute == "tagButton")
             ):
                 data = {
                     "component_id": evt.component_id,
